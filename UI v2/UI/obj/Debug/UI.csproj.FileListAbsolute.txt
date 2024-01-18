@@ -1,0 +1,10 @@
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.csproj.AssemblyReference.cache
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.Properties.Resources.resources
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.csproj.GenerateResource.cache
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.csproj.CoreCompileInputs.cache
+C:\Users\Asus\Desktop\UI\UI\bin\Debug\UI.exe.config
+C:\Users\Asus\Desktop\UI\UI\bin\Debug\UI.exe
+C:\Users\Asus\Desktop\UI\UI\bin\Debug\UI.pdb
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.Form1.resources
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.exe
+C:\Users\Asus\Desktop\UI\UI\obj\Debug\UI.pdb
