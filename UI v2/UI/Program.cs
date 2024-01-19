@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -30,21 +30,13 @@ public class SimpleGraphicalCalculator : Form
             Size = new Size(400, 300)
         };
 
-        this.Controls.Add(squareButton);
-        this.Controls.Add(cubeButton);
-        this.Controls.Add(linearButton);
-        this.Controls.Add(sineButton);
-        this.Controls.Add(cosineButton);
-        this.Controls.Add(plotPictureBox);
+        this.Controls.AddRange(new Control[] { squareButton, cubeButton, linearButton, sineButton, cosineButton, plotPictureBox });
 
         this.Size = new Size(450, 500);
-        this.Text = "Простой графический калькулятор";
+        this.Text = "Красивый графический калькулятор";
 
-        squareButton.Click += new EventHandler(OnPlotSquare);
-        cubeButton.Click += new EventHandler(OnPlotCube);
-        linearButton.Click += new EventHandler(OnPlotLinear);
-        sineButton.Click += new EventHandler(OnPlotSine);
-        cosineButton.Click += new EventHandler(OnPlotCosine);
+        SetButtonStyles();
+        AttachClickEvents();
     }
 
     private Button CreateButton(string text, int x, int y)
@@ -52,62 +44,89 @@ public class SimpleGraphicalCalculator : Form
         return new Button
         {
             Text = text,
-            Size = new Size(100, 30),
-            Location = new Point(x, y)
+            Size = new Size(100, 40),
+            Location = new Point(x, y),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(52, 152, 219),
+            ForeColor = Color.White,
+            Font = new Font("Arial", 12, FontStyle.Bold)
         };
     }
 
-    private void OnPlotSquare(object sender, EventArgs e)
+    private void SetButtonStyles()
     {
-        PlotFunction(x => x * x);
+        SetButtonStyle(squareButton, Color.FromArgb(231, 76, 60));
+        SetButtonStyle(cubeButton, Color.FromArgb(46, 204, 113));
+        SetButtonStyle(linearButton, Color.FromArgb(241, 196, 15));
+        SetButtonStyle(sineButton, Color.FromArgb(155, 89, 182));
+        SetButtonStyle(cosineButton, Color.FromArgb(230, 126, 34));
     }
 
-    private void OnPlotCube(object sender, EventArgs e)
+    private void SetButtonStyle(Button button, Color buttonColor)
     {
-        PlotFunction(x => x * x * x);
+        button.FlatAppearance.BorderSize = 0;
+        button.FlatAppearance.MouseDownBackColor = buttonColor;
+        button.FlatAppearance.MouseOverBackColor = buttonColor;
     }
 
-    private void OnPlotLinear(object sender, EventArgs e)
+    private void AttachClickEvents()
     {
-        PlotFunction(x => x);
+        squareButton.Click += (sender, e) => PlotFunction(x => x * x, "x^2", Color.Red);
+        cubeButton.Click += (sender, e) => PlotFunction(x => x * x * x, "x^3", Color.Green);
+        linearButton.Click += (sender, e) => PlotFunction(x => x, "x", Color.Blue);
+        sineButton.Click += (sender, e) => PlotFunction(x => (float)Math.Sin(x), "sin(x)", Color.Orange);
+        cosineButton.Click += (sender, e) => PlotFunction(x => (float)Math.Cos(x), "cos(x)", Color.Purple);
     }
 
-    private void OnPlotSine(object sender, EventArgs e)
-    {
-        PlotFunction(x => (float)Math.Sin(x));
-    }
-
-    private void OnPlotCosine(object sender, EventArgs e)
-    {
-        PlotFunction(x => (float)Math.Cos(x));
-    }
-
-    private void PlotFunction(Func<float, float> function)
+    private void PlotFunction(Func<float, float> function, string functionName, Color plotColor)
     {
         Bitmap plotBitmap = new Bitmap(plotPictureBox.Width, plotPictureBox.Height);
         using (Graphics g = Graphics.FromImage(plotBitmap))
         {
+            DrawGrid(g);
             DrawAxes(g);
-            DrawFunction(g, function);
+            DrawFunction(g, function, plotColor);
+            DrawFunctionName(g, functionName);
         }
 
         plotPictureBox.Image = plotBitmap;
+    }
+
+    private void DrawGrid(Graphics g)
+    {
+        Pen gridPen = new Pen(Color.LightGray);
+
+        // Рисуем вертикальные линии сетки
+        for (float x = -5.0f; x <= 5.0f; x += 1.0f)
+        {
+            float scaledX = x * plotPictureBox.Width / 10 + plotPictureBox.Width / 2;
+            g.DrawLine(gridPen, scaledX, 0, scaledX, plotPictureBox.Height);
+        }
+
+        // Рисуем горизонтальные линии сетки
+        for (float y = -1.0f; y <= 1.0f; y += 0.5f)
+        {
+            float scaledY = y * plotPictureBox.Height / 2 + plotPictureBox.Height / 2;
+            g.DrawLine(gridPen, 0, scaledY, plotPictureBox.Width, scaledY);
+        }
     }
 
     private void DrawAxes(Graphics g)
     {
         Pen axisPen = new Pen(Color.Black);
 
-        // Рисуем горизонтальную ось
-        g.DrawLine(axisPen, 0, plotPictureBox.Height / 2, plotPictureBox.Width, plotPictureBox.Height / 2);
-
-        // Рисуем вертикальную ось
-        g.DrawLine(axisPen, plotPictureBox.Width / 2, 0, plotPictureBox.Width / 2, plotPictureBox.Height);
+        DrawAxis(g, 0, plotPictureBox.Height / 2, plotPictureBox.Width, plotPictureBox.Height / 2); // Горизонтальная ось
+        DrawAxis(g, plotPictureBox.Width / 2, 0, plotPictureBox.Width / 2, plotPictureBox.Height); // Вертикальная ось
     }
 
-    private void DrawFunction(Graphics g, Func<float, float> function)
+    private void DrawAxis(Graphics g, float x1, float y1, float x2, float y2)
     {
-        Pen plotPen = new Pen(Color.Blue);
+        g.DrawLine(new Pen(Color.Black), x1, y1, x2, y2);
+    }
+
+    private void DrawFunction(Graphics g, Func<float, float> function, Color plotColor)
+    {
+        Pen plotPen = new Pen(plotColor);
 
         float scaleX = plotPictureBox.Width / 10.0f;
         float scaleY = plotPictureBox.Height / 2.0f;
@@ -126,7 +145,20 @@ public class SimpleGraphicalCalculator : Form
 
     private void DrawLine(Graphics g, float x1, float y1, float x2, float y2, Pen pen)
     {
-        g.DrawLine(pen, x1 * plotPictureBox.Width / 10 + plotPictureBox.Width / 2, y1 * plotPictureBox.Height / 2 + plotPictureBox.Height / 2, x2 * plotPictureBox.Width / 10 + plotPictureBox.Width / 2, y2 * plotPictureBox.Height / 2 + plotPictureBox.Height / 2);
+        float scaledX1 = x1 * plotPictureBox.Width / 10 + plotPictureBox.Width / 2;
+        float scaledY1 = y1 * plotPictureBox.Height / 2 + plotPictureBox.Height / 2;
+        float scaledX2 = x2 * plotPictureBox.Width / 10 + plotPictureBox.Width / 2;
+        float scaledY2 = y2 * plotPictureBox.Height / 2 + plotPictureBox.Height / 2;
+
+        g.DrawLine(pen, scaledX1, scaledY1, scaledX2, scaledY2);
+    }
+
+    private void DrawFunctionName(Graphics g, string functionName)
+    {
+        Font font = new Font("Arial", 12, FontStyle.Bold);
+        SolidBrush brush = new SolidBrush(Color.Black);
+
+        g.DrawString(functionName, font, brush, new Point(10, 10));
     }
 
     [STAThread]
